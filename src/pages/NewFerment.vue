@@ -1,0 +1,82 @@
+<template>
+  <q-page padding>
+    <q-form @reset='onReset' @submit='onSubmit(form)' class='q-gutter-md' ref='form'>
+      <q-input
+        :rules='[ val => val && val.length > 0 || `Field is required`]'
+        label='Ferment Name *'
+        lazy-rules
+        outlined
+        v-model='form.name'
+      />
+      <q-input
+        :rules='[ val => val && val.length > 0 || `Field is required`]'
+        label='Fermenter Name *'
+        lazy-rules
+        outlined
+        v-model='form.fermenter'
+      />
+      <q-select
+        :options='spindels'
+        :rules='[ val => val || `Field is required`]'
+        label='Select iSpindel *'
+        lazy-rules
+        option-label='name'
+        option-value='ID'
+        outlined
+        v-model='form.spindel'
+      />
+      <q-btn color='primary' label='Start ferment' type='submit' />
+      <q-btn color='primary' flat label='Reset form' type='reset' />
+    </q-form>
+  </q-page>
+</template>
+
+<script>
+import { mapState } from "vuex"
+export default {
+  name: "PageNewFerment",
+  data() {
+    return {
+      form: {
+        name: null,
+        fermenter: null,
+        spindel: null
+      }
+    }
+  },
+  computed: {
+    ...mapState("main", ["spindels"])
+  },
+  methods: {
+    onReset() {
+      this.form = {
+        name: null,
+        fermenter: null,
+        spindel: null
+      }
+      this.$refs.form.resetValidation()
+    },
+    onSubmit(form) {
+      this.$fs
+        .collection("ferments")
+        .add(form)
+        .then(() => {
+          this.$q.notify({
+            type: "positive",
+            message: "Ferment added successfully",
+            position: "top"
+          })
+        })
+        .then(() => {
+          this.onReset()
+        })
+        .catch((err) => {
+          this.$q.notify({
+            type: "negative",
+            message: "Error adding ferment"
+          })
+        })
+    }
+  }
+}
+</script>
