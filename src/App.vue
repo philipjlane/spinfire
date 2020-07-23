@@ -1,5 +1,5 @@
 <template>
-  <div id='q-app'>
+  <div id="q-app">
     <router-view />
   </div>
 </template>
@@ -8,9 +8,10 @@ import { mapActions } from 'vuex'
 export default {
   name: 'App',
   methods: {
-    ...mapActions('main', ['getSpindels']),
+    ...mapActions('main', ['getSpindels', 'getFerments']),
     initApp() {
       this.getSpindels()
+      this.getFerments()
     }
   },
   created() {

@@ -1,3 +1,6 @@
-export function updateSpindels (state,payload) {
+export function updateSpindels(state, payload) {
     state.spindels = payload
+}
+export function updateFerments(state, payload) {
+    state.ferments = payload
 }

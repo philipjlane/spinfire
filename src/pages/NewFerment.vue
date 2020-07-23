@@ -1,40 +1,46 @@
 <template>
   <q-page padding>
-    <q-form @reset='onReset' @submit='onSubmit(form)' class='q-gutter-md' ref='form'>
+    <q-form
+      v-if="spindels"
+      @reset="onReset"
+      @submit="onSubmit(form)"
+      class="q-gutter-md"
+      ref="formRef"
+    >
       <q-input
-        :rules='[ val => val && val.length > 0 || `Field is required`]'
-        label='Ferment Name *'
+        :rules="[(val) => (val && val.length > 0) || `Field is required`]"
+        label="Ferment Name *"
         lazy-rules
         outlined
-        v-model='form.name'
+        v-model="form.name"
       />
       <q-input
-        :rules='[ val => val && val.length > 0 || `Field is required`]'
-        label='Fermenter Name *'
+        :rules="[(val) => (val && val.length > 0) || `Field is required`]"
+        label="Fermenter Name *"
         lazy-rules
         outlined
-        v-model='form.fermenter'
+        v-model="form.fermenter"
       />
       <q-select
-        :options='spindels'
-        :rules='[ val => val || `Field is required`]'
-        label='Select iSpindel *'
+        v-model="form.spindel"
+        :options="selectOptions"
+        :rules="[(val) => (val && val.length > 0) || `Field is required`]"
+        label="Select iSpindel *"
         lazy-rules
-        option-label='name'
-        option-value='ID'
         outlined
-        v-model='form.spindel'
+        emit-value
+        map-options
       />
-      <q-btn color='primary' label='Start ferment' type='submit' />
-      <q-btn color='primary' flat label='Reset form' type='reset' />
+      <q-btn color="primary" label="Start ferment" type="submit" />
+      <q-btn color="primary" flat label="Reset form" type="reset" />
     </q-form>
   </q-page>
 </template>
 
 <script>
-import { mapState } from "vuex"
+import { mapState, mapActions } from 'vuex'
 export default {
-  name: "PageNewFerment",
+  name: 'PageNewFerment',
   data() {
     return {
       form: {
@@ -45,35 +51,50 @@ export default {
     }
   },
   computed: {
-    ...mapState("main", ["spindels"])
+    ...mapState('main', ['spindels']),
+    selectOptions() {
+      return this.spindels.map((x) => {
+        return { label: x.name, value: x.id, disabled: x.busy }
+      })
+    }
   },
   methods: {
+    ...mapActions('main', ['getSpindels', 'getFerments']),
     onReset() {
       this.form = {
         name: null,
         fermenter: null,
         spindel: null
       }
-      this.$refs.form.resetValidation()
+      this.$refs.formRef.resetValidation()
     },
     onSubmit(form) {
       this.$fs
-        .collection("ferments")
-        .add(form)
+        .collection('ferments')
+        .add({ ...form, finished: null })
         .then(() => {
           this.$q.notify({
-            type: "positive",
-            message: "Ferment added successfully",
-            position: "top"
+            type: 'positive',
+            message: 'Ferment added successfully',
+            position: 'top'
           })
         })
         .then(() => {
+          this.$fs
+            .collection('spindels')
+            .doc(form.spindel)
+            .update({ busy: true })
+        })
+        .then(() => {
           this.onReset()
+          this.getFerments()
+          this.$router.push('/ferments')
         })
         .catch((err) => {
           this.$q.notify({
-            type: "negative",
-            message: "Error adding ferment"
+            type: 'negative',
+            message: 'Error adding ferment',
+            position: 'top'
           })
         })
     }
