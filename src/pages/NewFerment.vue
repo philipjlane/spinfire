@@ -21,6 +21,32 @@
         outlined
         v-model="form.fermenter"
       />
+      <q-input
+        :rules="[
+          (val) => (val && val.length > 0) || `Field is required`,
+          (val) => val > 0.5 || `Value is out of range`,
+          (val) => val < 1.9 || `Value is out of range`
+        ]"
+        v-model="form.og"
+        label="Original Gravity *"
+        lazy-rules
+        outlined
+        mask="#.###"
+        fill-mask
+      />
+      <q-input
+        :rules="[
+          (val) => (val && val.length > 0) || `Field is required`,
+          (val) => val > 0.5 || `Value is out of range`,
+          (val) => val < 1.9 || `Value is out of range`
+        ]"
+        v-model="form.fg"
+        label="Target Gravity *"
+        lazy-rules
+        outlined
+        mask="#.###"
+        fill-mask
+      />
       <q-select
         v-model="form.spindel"
         :options="selectOptions"
@@ -46,7 +72,9 @@ export default {
       form: {
         name: null,
         fermenter: null,
-        spindel: null
+        spindel: null,
+        og: null,
+        fg: null
       }
     }
   },
@@ -64,7 +92,9 @@ export default {
       this.form = {
         name: null,
         fermenter: null,
-        spindel: null
+        spindel: null,
+        og: null,
+        fg: null
       }
       this.$refs.formRef.resetValidation()
     },

@@ -41,11 +41,12 @@
       >
         <q-card :class="props.selected ? 'bg-grey-2' : ''">
           <q-card-section>
-            <q-checkbox
+            <!-- <q-checkbox
               dense
               v-model="props.selected"
               :label="props.row.name"
-            />
+            /> -->
+            <div class="text-h6">{{ props.row.name }}</div>
           </q-card-section>
           <q-separator />
           <q-list dense>
@@ -68,11 +69,12 @@
               class="col"
               :to="`/ferments/${props.row.id}`"
             />
-            <q-btn label="Archive" color="negative" class="col" />
+            <!-- <q-btn label="Archive" color="negative" class="col" /> -->
             <q-btn
               label="Finish"
               color="accent"
               class="col"
+              :disable="!!props.row.finished"
               @click="finishFerment(props.row.id)"
             />
           </q-card-actions>
@@ -95,7 +97,7 @@ export default {
       selected: [],
       cols: [
         // { name: 'id', label: 'ID', field: 'id' },
-        { name: 'name', label: 'Name', field: 'name', align: 'left' },
+        // { name: 'name', label: 'Name', field: 'name', align: 'left' },
         {
           name: 'fermenter',
           label: 'Fermenter',

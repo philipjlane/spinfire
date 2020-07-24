@@ -20,11 +20,14 @@ exports.addData = functions.region('europe-west2').https.onRequest((req, res) =>
                 FS.collection('spindels').doc(`${req.body.ID}`).update({ name: req.body.name, updated: new Date })
             }
         })
+
         FS.collection('ferments').where('spindel', '==', `${req.body.ID}`).where('finished', '==', null).get().then(snap => {
             const updateDoc = snap.docs[0].id
             FS.collection('ferments').doc(updateDoc).update({
                 fermentData: admin.firestore.FieldValue.arrayUnion({ timeStamp: new Date, ...req.body })
             })
+        }).catch(err => {
+            console.warn(`Spindel [${req.body.name}] reporting data but not associated with active ferment`)
         })
     }
     res.end()
