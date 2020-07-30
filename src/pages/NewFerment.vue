@@ -82,12 +82,12 @@ export default {
     ...mapState('main', ['spindels']),
     selectOptions() {
       return this.spindels.map((x) => {
-        return { label: x.name, value: x.id, disabled: x.busy }
+        return { label: x.name, value: x.id, disable: x.busy }
       })
     }
   },
   methods: {
-    ...mapActions('main', ['getSpindels', 'getFerments']),
+    ...mapActions('main', ['getFerments']),
     onReset() {
       this.form = {
         name: null,
@@ -100,8 +100,14 @@ export default {
     },
     onSubmit(form) {
       this.$fs
+        .collection('users')
+        .doc(this.$auth.currentUser.uid)
         .collection('ferments')
-        .add({ ...form, finished: null })
+        .add({
+          ...form,
+          finished: null,
+          created: this.$fs2.FieldValue.serverTimestamp()
+        })
         .then(() => {
           this.$q.notify({
             type: 'positive',
@@ -111,6 +117,8 @@ export default {
         })
         .then(() => {
           this.$fs
+            .collection('users')
+            .doc(this.$auth.currentUser.uid)
             .collection('spindels')
             .doc(form.spindel)
             .update({ busy: true })
@@ -121,6 +129,7 @@ export default {
           this.$router.push('/ferments')
         })
         .catch((err) => {
+          console.error(err)
           this.$q.notify({
             type: 'negative',
             message: 'Error adding ferment',

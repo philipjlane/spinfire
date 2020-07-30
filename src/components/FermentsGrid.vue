@@ -6,14 +6,15 @@
     grid
     hide-header
     row-key="id"
-    title="Ferments"
-    :loading="!tableData.length"
+    :title="$q.screen.gt.xs ? 'Ferments' : ''"
+    :loading="!tableData.length && !timeout"
     selection="multiple"
     :selected.sync="selected"
   >
     <template v-slot:top-right>
       <div class="row">
         <q-btn
+          v-if="$q.screen.gt.xs"
           icon="add"
           label="New"
           color="primary"
@@ -67,7 +68,7 @@
               label="View data"
               color="primary"
               class="col"
-              :to="`/ferments/${props.row.id}`"
+              :to="`/ferments/${$auth.currentUser.uid}/${props.row.id}`"
             />
             <!-- <q-btn label="Archive" color="negative" class="col" /> -->
             <q-btn
@@ -118,7 +119,8 @@ export default {
           format: (val) => (!val ? 'True' : 'False'),
           align: 'left'
         }
-      ]
+      ],
+      timeout: false
     }
   },
   computed: {
@@ -128,10 +130,22 @@ export default {
     ...mapActions('main', ['getFerments']),
     finishFerment(id) {
       this.$fs
+        .collection('users')
+        .doc(this.$auth.currentUser.uid)
         .collection('ferments')
         .doc(id)
         .update({
           finished: new Date()
+        })
+        .then(() => {
+          this.$fs
+            .collection('users')
+            .doc(this.$auth.currentUser.uid)
+            .collection('spindels')
+            .doc(this.tableData.find((x) => (x) => id === id).spindel)
+            .update({
+              busy: false
+            })
         })
         .then(() => {
           this.$q.notify({
@@ -144,6 +158,11 @@ export default {
           this.getFerments()
         })
     }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.timeout = true
+    }, 5000)
   }
 }
 </script>

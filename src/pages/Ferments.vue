@@ -1,6 +1,13 @@
 <template>
   <q-page padding>
     <ferments-grid :tableData="ferments" />
+    <q-page-sticky
+      v-if="$q.screen.lt.sm"
+      position="bottom-right"
+      :offset="[18, 18]"
+    >
+      <q-btn fab icon="add" color="accent" label="New" to="/new" />
+    </q-page-sticky>
   </q-page>
 </template>
 

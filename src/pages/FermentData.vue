@@ -1,90 +1,125 @@
 <template>
-  <q-page padding class="row">
-    <div class="col" v-if="ferment && ferment.fermentData">
-      <div class="row q-col-gutter-md q-mb-md">
-        <div class="col">
-          <q-card>
-            <q-card-section class="text-subtitle1">
-              Current
-            </q-card-section>
-            <q-separator inset />
-            <q-list>
-              <q-item>
-                <q-item-section avatar>ABV:</q-item-section>
-                <q-item-section>
-                  {{
-                    calcAbvP(
-                      ferment.og,
-                      ferment.fermentData[ferment.fermentData.length - 1]
-                        .gravity
-                    )
-                  }}%</q-item-section
-                >
-              </q-item>
-              <q-item>
-                <q-item-section avatar>SG:</q-item-section>
-                <q-item-section>
-                  {{
-                    platoToSg(
-                      ferment.fermentData[ferment.fermentData.length - 1]
-                        .gravity
-                    ).toFixed(3)
-                  }}</q-item-section
-                >
-              </q-item>
-            </q-list>
-          </q-card>
+  <q-page padding>
+    <template v-if="viewedFerment && viewedFerment.fermentData">
+      <div class="row q-col-gutter-md items-center">
+        <div class="col-xs-12 col-sm">
+          <chart
+            :series="series"
+            :options="chartOptions"
+            style="margin: 0 auto; min-height: 500px;"
+            class="full-height"
+            key="chart"
+          />
         </div>
-        <div class="col">
-          <q-card>
-            <q-card-section class="text-subtitle1">
-              Target
-            </q-card-section>
-            <q-separator inset />
-            <q-list>
-              <q-item>
-                <q-item-section avatar>ABV:</q-item-section>
-                <q-item-section>
-                  {{ calcAbvSg(ferment.og, ferment.fg) }}%</q-item-section
-                >
-              </q-item>
-              <q-item>
-                <q-item-section avatar>SG:</q-item-section>
-                <q-item-section> {{ ferment.fg }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-card>
+        <div
+          class="col-xs-12 col-sm-3 column q-pb-md"
+          :class="{ 'q-col-gutter-md': $q.screen.gt.xs }"
+        >
+          <div class="col-auto">
+            <q-card>
+              <q-card-section class="text-subtitle1">
+                {{ viewedFerment.name }}
+              </q-card-section>
+              <q-separator inset />
+              <q-list>
+                <q-item>
+                  <q-item-section avatar>Fermenter:</q-item-section>
+                  <q-item-section>
+                    {{ viewedFerment.fermenter }}</q-item-section
+                  >
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>iSpindel:</q-item-section>
+                  <q-item-section> {{ spindel.name }}</q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>OG:</q-item-section>
+                  <q-item-section> {{ viewedFerment.og }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+          <div class="col">
+            <q-card
+              :class="{
+                'bg-positive': targetAbvMet,
+                'text-white': targetAbvMet,
+                'q-my-md': $q.screen.lt.sm
+              }"
+            >
+              <q-card-section class="text-subtitle1">
+                Current
+              </q-card-section>
+              <q-separator inset />
+              <q-list>
+                <q-item>
+                  <q-item-section avatar>ABV:</q-item-section>
+                  <q-item-section>
+                    {{
+                      calcAbvP(
+                        viewedFerment.og,
+                        viewedFerment.fermentData[
+                          viewedFerment.fermentData.length - 1
+                        ].gravity
+                      )
+                    }}%</q-item-section
+                  >
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>SG:</q-item-section>
+                  <q-item-section>
+                    {{
+                      platoToSg(
+                        viewedFerment.fermentData[
+                          viewedFerment.fermentData.length - 1
+                        ].gravity
+                      ).toFixed(3)
+                    }}</q-item-section
+                  >
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+          <div class="col">
+            <q-card>
+              <q-card-section class="text-subtitle1">
+                Target
+              </q-card-section>
+              <q-separator inset />
+              <q-list>
+                <q-item>
+                  <q-item-section avatar>ABV:</q-item-section>
+                  <q-item-section>
+                    {{
+                      calcAbvSg(viewedFerment.og, viewedFerment.fg)
+                    }}%</q-item-section
+                  >
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>SG:</q-item-section>
+                  <q-item-section> {{ viewedFerment.fg }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
         </div>
       </div>
-
-      <transition-group
-        appear
-        enter-active-class="animated fadeIn"
-        leave-active-class="animated fadeOut"
-      >
-        <chart
-          :series="series"
-          :options="chartOptions"
-          style="max-width: 800px; margin: 0 auto;"
-          key="chart"
-        />
-        <q-table
-          :data="ferment.fermentData"
-          :columns="cols"
-          :rows-per-page-options="[10, 25, 50, 100, 0]"
-          key="table"
-        />
-      </transition-group>
-    </div>
+      <q-table
+        :data="viewedFerment.fermentData"
+        :columns="cols"
+        :rows-per-page-options="[10, 25, 50, 100, 0]"
+        key="table"
+      />
+    </template>
     <template v-else>
-      <div class="col row justify-center">
-        <div class="column col-xs-12 col-sm-4 justify-center">
-          <div class="col-4">
-            <q-img
+      <div class="row justify-center">
+        <div class="column col-xs-12 col-sm-4 justify-center full-height">
+          <div class="col-4 text-center q-pt-lg">
+            <img
               src="images/HaveAHomeBrew.svg"
               alt="No data image"
-              class="full-height"
-              contain
+              :class="{ 'full-width': $q.screen.gt.xs }"
+              :style="$q.screen.lt.sm ? 'max-width: 300px' : ''"
             />
           </div>
           <div class="col-auto">
@@ -99,6 +134,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import Chart from 'vue-apexcharts'
 export default {
   name: 'PageFermentData',
@@ -149,22 +185,28 @@ export default {
     }
   },
   computed: {
+    ...mapState('main', ['viewedFerment']),
     ferment() {
       return this.$store.state.main.ferments.find(
         (ferment) => ferment.id === this.$route.params.id
+      )
+    },
+    spindel() {
+      return this.$store.state.main.spindels.find(
+        (spindel) => spindel.id === this.viewedFerment.spindel
       )
     },
     series() {
       return [
         {
           name: 'Gravity',
-          data: this.ferment.fermentData.map((x) =>
+          data: this.viewedFerment.fermentData.map((x) =>
             this.platoToSg(x.gravity).toFixed(3)
           )
         },
         {
           name: 'Temperature',
-          data: this.ferment.fermentData.map((x) => x.temperature)
+          data: this.viewedFerment.fermentData.map((x) => x.temperature)
         }
       ]
     },
@@ -172,6 +214,7 @@ export default {
       return {
         chart: {
           type: 'area',
+          height: this.$q.screen.lt.sm ? '600' : '',
           zoom: {
             type: 'x',
             enabled: true,
@@ -208,7 +251,7 @@ export default {
           }
         },
         xaxis: {
-          categories: this.ferment.fermentData.map((x) =>
+          categories: this.viewedFerment.fermentData.map((x) =>
             x.timeStamp.toDate().toLocaleString()
           )
         },
@@ -222,9 +265,19 @@ export default {
           { opposite: true, title: { text: 'Temperature' } }
         ]
       }
+    },
+    targetAbvMet() {
+      return (
+        this.platoToSg(
+          this.viewedFerment.fermentData[
+            this.viewedFerment.fermentData.length - 1
+          ].gravity
+        ).toFixed(3) <= this.viewedFerment.fg
+      )
     }
   },
   methods: {
+    ...mapActions('main', ['createFermentListener']),
     platoToSg(val) {
       return 259 / (259 - val)
     },
@@ -243,6 +296,9 @@ export default {
         (currentSg / 0.794)
       ).toFixed(2)
     }
+  },
+  created() {
+    this.createFermentListener(this.$route.params.id)
   }
 }
 </script>

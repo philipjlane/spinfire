@@ -5,8 +5,6 @@
     "typescript",
     "vue"
   ],
-  
-  "vetur.experimental.templateInterpolationService": true,
   "vetur.format.defaultFormatterOptions": {
 
     "js-beautify-html": {
